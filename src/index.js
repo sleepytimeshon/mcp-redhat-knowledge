@@ -251,7 +251,7 @@ const paginationSchema = {
 
 const server = new McpServer({
   name: "mcp-redhat-knowledge",
-  version: "1.2.0",
+  version: "1.2.1",
 });
 
 server.registerTool(
