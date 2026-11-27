@@ -4,6 +4,35 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-11-27
+
+### Added
+- `getDocumentation` tool: the full text of a docs.redhat.com chapter, or one `#section` of it, as Markdown with procedures, commands, and notes intact, plus previous/next chapter links and the chapter list on a guide's index page.
+- `getSolution` returns full solutions (environment, issue, resolution, root cause, and diagnostic steps) and full article bodies when `REDHAT_TOKEN` is set, by loading the document from the Customer Portal page; no Red Hat API serves solution bodies.
+- Search results end with a line naming the tool that reads each kind of result in full; `getSolution` redirects advisory IDs and documentation URLs to `getErrata` and `getDocumentation`.
+- `searchErrata` tool: find advisories by CVE, package, or keyword, newest first, with optional product, severity, and advisory type filters.
+- `getCve` tool: Red Hat's assessment of a CVE (severity, CVSS, details, statement, mitigation, fixing advisories and packages per product, and the state of other products) from the public Security Data API.
+- `maxResults` on `searchDocumentation`.
+- Offline tests of the helpers, formatters, HTML conversion, and page loading (`test/unit.mjs`, `test/portal.mjs`), run by `npm test`.
+
+### Changed
+- `REDHAT_TOKEN` is optional: without it, search tools query the Knowledge Base anonymously.
+- Without a token, `getSolution` returns the search index's issue and summary and names the sections it could not include. Previously it omitted them silently with a token and printed the literal `subscriber_only` without one.
+- Search results show the total match count and each result's products, give absolute Customer Portal URLs, and trim abstracts to 300 characters.
+- `documentType` is case-insensitive.
+- Every Red Hat API request times out after 30 seconds, and a rejected cached access token is exchanged again once.
+- API clients, helpers, and formatters moved to `src/lib.js`; HTML-to-Markdown conversion is in `src/html.js` and page loading in `src/portal.js`.
+
+### Fixed
+- `getSolution` returned an unrelated document when the requested ID did not exist (for example, `3138` returned CVE-2015-3138); it now matches the ID exactly, only against solutions and articles, and prefers the English original over translations.
+- `getErrata` omitted the advisory's description, and listed per-architecture package builds under "Affected Products"; it now shows the details, the product names, and the fixed packages.
+- `getErrata` accepts lowercase IDs and rejects malformed ones before calling the API.
+- `maxResults` rejects non-integers, which the API answered with a 400.
+- A double quote in a `product` or `documentType` value no longer breaks the search query.
+- Documentation results showed "Untitled".
+- Tool descriptions claimed a default OpenShift product filter that was never applied, and described `offset` in bytes instead of characters.
+- README product alias table lacked Directory Server, Certificate System, Data Grid, and AMQ.
+
 ## [1.2.2] - 2026-11-23
 
 ### Added
@@ -55,7 +84,8 @@ All notable changes to this project are documented in this file. The format is b
 ### Added
 - First public release: an MCP server for the Red Hat Knowledge Base with `searchKnowledgeBase`, `getSolution`, `searchDocumentation`, and `getErrata`, including product name aliases for search filters and tool annotations.
 
-[Unreleased]: https://github.com/sleepytimeshon/mcp-redhat-knowledge/compare/v1.2.2...HEAD
+[Unreleased]: https://github.com/sleepytimeshon/mcp-redhat-knowledge/compare/v1.3.0...HEAD
+[1.3.0]: https://www.npmjs.com/package/mcp-redhat-knowledge/v/1.3.0
 [1.2.2]: https://www.npmjs.com/package/mcp-redhat-knowledge/v/1.2.2
 [1.2.1]: https://www.npmjs.com/package/mcp-redhat-knowledge/v/1.2.1
 [1.2.0]: https://www.npmjs.com/package/mcp-redhat-knowledge/v/1.2.0
